@@ -219,10 +219,14 @@ int main(void) {
     double x;
     assert(fp_atod("123.456", 7, &x) && x == 123.456);
     assert(!fp_atod("A23.456", 7, &x) && isnan(x));
+    assert(!fp_atod("", 0, &x) && isnan(x));
+    assert(!fp_atod(0, 0, &x) && isnan(x));
     float y;
     assert(fp_atof("123.456", 7, &y) && y == 123.456f);
     assert(!fp_atof("A23.456", 7, &y) && isnan(y));
-
+    assert(!fp_atof("", 0, &y) && isnan(y));
+    assert(!fp_atof(0, 0, &y) && isnan(y));
+    
 
     char *list = 
         "1230456078.90123e10\n"

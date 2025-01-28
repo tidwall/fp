@@ -2496,7 +2496,7 @@ FP_EXTERN size_t fp_ftoa(float f, char fmt, char dst[], size_t n) {
 // s2d_n is very strict and will sometime return RYU_INPUT_TOO_LONG even
 // though the number is correct, albeit just a very long string.
 // In that case fallback to the built-in strtod().
-#define fp_fallback_clib(func) {                  \
+#define fp_fallback_clib(func) if (len > 0) {     \
     char *end;                                    \
     errno = 0;                                    \
     *x = func(data, &end);                        \
