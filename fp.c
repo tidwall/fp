@@ -33,6 +33,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 #ifdef FP_STATIC
 #define FP_EXTERN static
@@ -2492,16 +2493,26 @@ FP_EXTERN size_t fp_ftoa(float f, char fmt, char dst[], size_t n) {
     return fp_utoa((union fpoint){ .f = f }, 32, fmt, dst, n);
 }
 
+// s2d_n is very strict and will sometime return RYU_INPUT_TOO_LONG even
+// though the number is correct, albeit just a very long string.
+// In that case fallback to the built-in strtod().
+#define fp_fallback_clib(func) {                  \
+    char *end;                                    \
+    errno = 0;                                    \
+    *x = func(data, &end);                        \
+    ok = (size_t)(end-data) == len && errno == 0; \
+    if (!ok) {                                    \
+        *x = NAN;                                 \
+    }                                             \
+}
+
 /// Convert a string to a double
 /// Returns false if the input is invalid
 FP_EXTERN bool fp_atod(const char *data, size_t len, double *x) {
-    *x = 0.0;
+    *x = NAN;
     bool ok = s2d_n(data, len, x) == RYU_SUCCESS;
     if (!ok) {
-        char *end;
-        errno = 0;
-        *x = strtod(data, &end);
-        ok = errno == 0;
+        fp_fallback_clib(strtod);
     }
     return ok;
 }
@@ -2509,13 +2520,10 @@ FP_EXTERN bool fp_atod(const char *data, size_t len, double *x) {
 /// Convert a string to a float
 /// Returns false if the input is invalid
 FP_EXTERN bool fp_atof(const char *data, size_t len, float *x) {
-    *x = 0.0f;
+    *x = NAN;
     bool ok = s2f_n(data, len, x) == RYU_SUCCESS;
     if (!ok) {
-        char *end;
-        errno = 0;
-        *x = strtof(data, &end);
-        ok = errno == 0;
+        fp_fallback_clib(strtof);
     }
     return ok;
 }

@@ -216,6 +216,14 @@ int main(void) {
     test_j(5.307740298202583E+22);
     test_j(186872634142835570000.0);
 
+    double x;
+    assert(fp_atod("123.456", 7, &x) && x == 123.456);
+    assert(!fp_atod("A23.456", 7, &x) && isnan(x));
+    float y;
+    assert(fp_atof("123.456", 7, &y) && y == 123.456f);
+    assert(!fp_atof("A23.456", 7, &y) && isnan(y));
+
+
     char *list = 
         "1230456078.90123e10\n"
         "-7750609.598126\n"
